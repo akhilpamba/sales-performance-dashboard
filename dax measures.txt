@@ -1,0 +1,57 @@
+-- DAX measures used in the Power BI dashboard
+-- saving these here so I don't have to rebuild them if the file gets corrupted
+
+
+-- Total Revenue
+Total Revenue = SUM(sales[revenue])
+
+-- Total Orders
+Total Orders = DISTINCTCOUNT(sales[order_id])
+
+-- Gross Margin %
+Gross Margin % = 
+DIVIDE(
+    SUM(sales[revenue]) - SUM(sales[cogs]),
+    SUM(sales[revenue]),
+    0
+)
+
+-- YoY Revenue Growth
+YoY Revenue Growth = 
+VAR current_year = [Total Revenue]
+VAR prior_year = CALCULATE([Total Revenue], SAMEPERIODLASTYEAR('Date'[Date]))
+RETURN
+DIVIDE(current_year - prior_year, prior_year, 0)
+
+-- Running Total Revenue
+Running Total Revenue = 
+CALCULATE(
+    [Total Revenue],
+    DATESYTD('Date'[Date])
+)
+
+-- Avg Order Value
+Avg Order Value = DIVIDE([Total Revenue], [Total Orders], 0)
+
+-- Return Rate %
+Return Rate % = 
+DIVIDE(
+    SUM(sales[returns_value]),
+    SUM(sales[revenue]),
+    0
+)
+
+-- SKU Sell-Through Rate
+Sell-Through Rate = 
+DIVIDE(
+    SUM(sales[units_sold]),
+    SUM(inventory[units_available]),
+    0
+)
+
+-- MoM Revenue Change
+MoM Revenue Change = 
+VAR current_month = [Total Revenue]
+VAR prior_month = CALCULATE([Total Revenue], DATEADD('Date'[Date], -1, MONTH))
+RETURN
+DIVIDE(current_month - prior_month, prior_month, 0)
